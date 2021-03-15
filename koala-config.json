@@ -1,0 +1,10 @@
+{
+	"ignores": [
+		".dist", 
+		".git", 
+		"css", 
+		"js", 
+		"node_modules", 
+		"resources"		
+	]
+}
