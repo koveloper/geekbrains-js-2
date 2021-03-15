@@ -1,0 +1,26 @@
+{
+  "name": "geekbrains-js-2",
+  "version": "1.0.0",
+  "description": "Homeworks from GeekBrains JavaScript level-2 courses",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/koveloper/geekbrains-js-2.git"
+  },
+  "keywords": [
+    "GeekBrains",
+    "JavaScript"
+  ],
+  "author": "koveloper",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/koveloper/geekbrains-js-2/issues"
+  },
+  "homepage": "https://github.com/koveloper/geekbrains-js-2#readme",
+  "devDependencies": {
+    "eslint": "^7.22.0"
+  }
+}
