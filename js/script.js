@@ -1,38 +1,5 @@
 'use strict';
 
-function RequestFactory(url) {
-	return new Promise((onSuccess, onError) => {
-		const request_ = window.XMLHttpRequest ? new XMLHttpRequest() : (window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : null);
-		let done_ = false;
-		if (!request_) {
-			return;
-		}
-		request_.timeout = 10000;
-		request_.onreadystatechange = function () {
-			console.log(request_.readyState);
-			if (request_.readyState === 4) {
-				console.log(request_.status);
-				if (!done_ && request_.status != 200) {
-					done_ = true;
-					onError('Response code is ' + request_.status);
-				} else if (!done_ && request_.status == 200) {
-					done_ = true;
-					onSuccess(request_.responseText);
-				}
-			}
-		}
-		request_.ontimeout = function () {
-			if (!done_ && onErrorCallback) {
-				done_ = true;
-				onError('Timeout reached');
-			}
-		}
-		request_.open('GET', url, true);
-		request_.setRequestHeader('Content-Type', 'text/plain');
-		request_.send();
-	});
-}
-
 const DFLT_GOODS_ITEM = {
 	name: 'NEW',
 	price: 99,
@@ -269,19 +236,21 @@ class GoodsList {
 		});
 	}
 
-	fetch() {
+	initialize() {
 		const err_ = (err) => {
 			alert(err);
 		}
-		const ok_ = (data) => {
-			const goods_ = JSON.parse(data);
+		const ok_ = (goods_) => {
 			console.log(goods_)
 			for (let good of goods_) {
 				this.add(good.product_name, good.product_price, good.product_description, good.product_images, good.product_id);
 			}
 			this.render();
 		}
-		new RequestFactory('https://resources.radio-most.ru/geekbrains/goods.json?v=' + Math.random()).then(ok_).catch(err_);
+		fetch('https://resources.radio-most.ru/geekbrains/goods.json?v=' + Math.random())
+			.then((response) => {return response.json()})
+			.then(ok_)
+			.catch(err_);
 	}
 
 	getContainer() {
@@ -316,7 +285,7 @@ class Magazine {
 	}
 
 	initialize() {
-		this.goods.fetch();
+		this.goods.initialize();
 	}
 
 	openCart() {
