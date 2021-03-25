@@ -281,7 +281,7 @@ class GoodsList {
 			}
 			this.render();
 		}
-		new RequestFactory('https://resource.radio-most.ru/geekbrains/goods.json?v=' + Math.random()).then(ok_).catch(err_);
+		new RequestFactory('https://resources.radio-most.ru/geekbrains/goods.json?v=' + Math.random()).then(ok_).catch(err_);
 	}
 
 	getContainer() {
