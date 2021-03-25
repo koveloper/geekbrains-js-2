@@ -143,3 +143,20 @@ body {
   align-items: center;
   width: 100%;
 }
+.cart-item-delete {
+  border: none;
+  outline: none;
+  color: rgba(255, 0, 0, 0.5);
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 0 8px;
+  cursor: pointer;
+  background: transparent;
+  transition: 0.3s;
+}
+.cart-item-delete:hover {
+  color: red;
+}
+.cart-item-delete:active {
+  color: blue;
+}

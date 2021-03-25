@@ -1,5 +1,38 @@
 'use strict';
 
+function RequestFactory(url) {
+	return new Promise((onSuccess, onError) => {
+		const request_ = window.XMLHttpRequest ? new XMLHttpRequest() : (window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : null);
+		let done_ = false;
+		if (!request_) {
+			return;
+		}
+		request_.timeout = 10000;
+		request_.onreadystatechange = function () {
+			console.log(request_.readyState);
+			if (request_.readyState === 4) {
+				console.log(request_.status);
+				if (!done_ && request_.status != 200) {
+					done_ = true;
+					onError('Response code is ' + request_.status);
+				} else if (!done_ && request_.status == 200) {
+					done_ = true;
+					onSuccess(request_.responseText);
+				}
+			}
+		}
+		request_.ontimeout = function () {
+			if (!done_ && onErrorCallback) {
+				done_ = true;
+				onError('Timeout reached');
+			}
+		}
+		request_.open('GET', url, true);
+		request_.setRequestHeader('Content-Type', 'text/plain');
+		request_.send();
+	});
+}
+
 const DFLT_GOODS_ITEM = {
 	name: 'NEW',
 	price: 99,
@@ -35,10 +68,6 @@ class GoodsItem {
 
 	getImages() {
 		return this.images;
-	}
-
-	getHash() {
-		return this.id + '-' + this.name + "-" + this.price + "-" + this.description;
 	}
 
 	render(container) {
@@ -96,31 +125,55 @@ class CartItem extends GoodsItem {
 
 	render(container) {
 		if (container && container.append && typeof container.append == 'function') {
-
-			const cartItem = document.createElement('div');
-			cartItem.setAttribute('class', 'cart-item');
-			cartItem.setAttribute('id', 'ci-' + this.id);
-
-			if (this.images && this.images.length) {
-				const img = document.createElement('img');
-				img.setAttribute('src', this.images[0]);
-				img.setAttribute('width', '32');
-				img.setAttribute('height', '32');
-				img.setAttribute('style', 'pointer-events: none; margin: 0 4px 0 0');
-				cartItem.append(img);
-			}
-
-			const cartItemTitle = document.createElement('h3');
-			cartItemTitle.textContent = this.name;
-			cartItemTitle.setAttribute('style', 'pointer-events: none');
-			cartItem.append(cartItemTitle);
-
-			const cartItemPrice = document.createElement('p');
-			cartItemPrice.textContent = this.count + ' x ' + this.price + '$';
-			cartItemPrice.setAttribute('style', 'pointer-events: none; margin: 0 0 0 auto');
-			cartItem.append(cartItemPrice);
-			container.append(cartItem);
+			container.append(CartItem.createCartItemHTML({
+				id: this.id,
+				image: this.images && this.images.length ? this.images[0] : null,
+				name: this.name,
+				price: this.price,
+				count: this.count
+			}));
 		}
+	}
+
+	static createCartItemHTML({ id, image, name, price, count = 1, style }) {
+		const cartItem = document.createElement('div');
+		cartItem.setAttribute('class', 'cart-item');
+		if (id) {
+			cartItem.setAttribute('id', 'ci-' + id);
+		}
+		if (style) {
+			cartItem.setAttribute('style', style);
+		}
+		if (image) {
+			const img = document.createElement('img');
+			img.setAttribute('src', image);
+			img.setAttribute('width', '32');
+			img.setAttribute('height', '32');
+			img.setAttribute('style', 'pointer-events: none; margin: 0 4px 0 0');
+			cartItem.append(img);
+		}
+		const cartItemTitle = document.createElement('h3');
+		cartItemTitle.textContent = name;
+		cartItemTitle.setAttribute('style', 'pointer-events: none');
+		cartItem.append(cartItemTitle);
+
+		const cartItemPrice = document.createElement('p');
+		cartItemPrice.textContent = `${count ? (count + ' x ') : ''}${price}$ ${count ? ('= ' + (count * price) + '$') : ''}`;
+		cartItemPrice.setAttribute('style', 'pointer-events: none; margin: 0 0 0 auto');
+		cartItem.append(cartItemPrice);
+
+		const cartItemDelete = document.createElement('button');
+		cartItemDelete.textContent = `X`;
+		cartItemDelete.setAttribute('class', 'cart-item-delete');
+		if (id) {
+			cartItemDelete.setAttribute('id', 'cid-' + id);
+		}
+		cartItem.append(cartItemDelete);
+		return cartItem;
+	}
+
+	static getIdByDeleteButton(target) {
+		return target.id.replace('cid-', '');
 	}
 }
 
@@ -131,15 +184,21 @@ class Cart {
 	}
 
 	add(goodsItem, count = 1) {
-		if (!this.goodsMap.has(goodsItem.getHash())) {
-			this.goodsMap.set(goodsItem.getHash(), new CartItem(goodsItem));
-		}
-		const it = this.goodsMap.get(goodsItem.getHash());
-		it.add(count);
-		if (it.getCount() <= 0) {
-			this.goodsMap.delete(it.getGoodsItem)
+		if (goodsItem) {
+			if (!this.goodsMap.has('' + goodsItem.getId())) {
+				this.goodsMap.set('' + goodsItem.getId(), new CartItem(goodsItem));
+			}
+			const it = this.goodsMap.get('' + goodsItem.getId());
+			it.add(count);
+			if (it.getCount() <= 0) {
+				this.goodsMap.delete(it.getGoodsItem)
+			}
 		}
 		this.renderCompactView(document.querySelector('.cart-button'));
+	}
+
+	getInner() {
+		return [...this.goodsMap.values()];
 	}
 
 	getInnerGoodsCost() {
@@ -156,9 +215,17 @@ class Cart {
 		const sign = document.createElement('span');
 		sign.textContent = 'Carts: ' + this.getInnerGoodsCount();
 		const cost = document.createElement('span');
-		cost.textContent = 'for ' + this.getInnerGoodsCost() + '$.';
+		cost.textContent = 'for ' + this.getInnerGoodsCost() + '$';
 		container.append(sign);
 		container.append(cost);
+	}
+
+	deleteCartItem(id) {
+		if (id !== undefined) {
+			this.goodsMap.delete(id)
+		} else {
+			this.goodsMap.clear();
+		}
 	}
 
 	renderMainView(container) {
@@ -167,23 +234,24 @@ class Cart {
 			it.render(container);
 		}
 		if (this.goodsMap.size) {
-			const cartItem = document.createElement('div');
-			cartItem.setAttribute('class', 'cart-item');
-			cartItem.setAttribute('style', 'border-top: 1px solid gray');
-
-			const cartItemTitle = document.createElement('h3');
-			cartItemTitle.textContent = 'Summary';
-			// cartItemTitle.setAttribute('style', 'margin: 0');
-			cartItem.append(cartItemTitle);
-
-			const cartItemPrice = document.createElement('p');
-			cartItemPrice.textContent = this.getInnerGoodsCost() + '$';
-			cartItemPrice.setAttribute('style', 'margin: 0 0 0 auto; font-weight: 800');
-			cartItem.append(cartItemPrice);
-			container.append(cartItem);
-
+			container.append(CartItem.createCartItemHTML({
+				name: 'Summary',
+				price: this.getInnerGoodsCost(),
+				count: 0,
+				style: 'border-top: 1px solid gray'
+			}));
 		}
-
+		container.onclick = (e) => {
+			if (e.target.classList && e.target.classList.contains('cart-item-delete')) {
+				if (e.target.id) {
+					this.deleteCartItem(CartItem.getIdByDeleteButton(e.target));
+				} else {
+					this.deleteCartItem();
+				}
+				this.renderMainView(container);
+				this.add();
+			}
+		};
 	}
 }
 
@@ -199,6 +267,21 @@ class GoodsList {
 				}
 			}
 		});
+	}
+
+	fetch() {
+		const err_ = (err) => {
+			alert(err);
+		}
+		const ok_ = (data) => {
+			const goods_ = JSON.parse(data);
+			console.log(goods_)
+			for (let good of goods_) {
+				this.add(good.product_name, good.product_price, good.product_description, good.product_images, good.product_id);
+			}
+			this.render();
+		}
+		new RequestFactory('https://resources.radio-most.ru/geekbrains/goods.json?v=' + Math.random()).then(ok_, err_);
 	}
 
 	getContainer() {
@@ -217,37 +300,6 @@ class GoodsList {
 	}
 }
 
-function RequestFactory({ url, onSuccessCallback, onErrorCallback }) {
-	const request_ = window.XMLHttpRequest ? new XMLHttpRequest() : (window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : null);
-	let done_ = false;
-	if (!request_) {
-		return;
-	}
-	request_.timeout = 10000;
-	request_.onreadystatechange = function () {
-		console.log(request_.readyState);
-		if (request_.readyState === 4) {
-			console.log(request_.status);
-			if (!done_ && request_.status != 200 && onErrorCallback) {
-				done_ = true;
-				onErrorCallback();
-			} else if (!done_ && request_.status == 200 && onSuccessCallback) {
-				done_ = true;
-				onSuccessCallback(request_.responseText);
-			}
-		}
-	}
-	request_.ontimeout = function () {
-		if (!done_ && onErrorCallback) {
-			done_ = true;
-			onErrorCallback();
-		}
-	}
-	request_.open('GET', url, true);
-	request_.setRequestHeader('Content-Type', 'text/plain');
-	request_.send();
-}
-
 class Magazine {
 
 	constructor() {
@@ -263,19 +315,8 @@ class Magazine {
 		this.cart.add(goodsItem, count);
 	}
 
-	fetch() {
-		const err_ = () => {
-
-		}
-		const ok_ = (data) => {
-			const goods_ = JSON.parse(data);
-			console.log(goods_)
-			for (let good of goods_) {
-				this.goods.add(good.product_name, good.product_price, good.product_description, good.product_images, good.product_id);
-			}
-			this.goods.render();
-		}
-		new RequestFactory({ url: 'https://resources.radio-most.ru/geekbrains/goods.json?v=' + Math.random(), onErrorCallback: err_, onSuccessCallback: ok_ });
+	initialize() {
+		this.goods.fetch();
 	}
 
 	openCart() {
@@ -289,4 +330,4 @@ class Magazine {
 }
 
 const magazine = new Magazine();
-magazine.fetch();
+magazine.initialize();
