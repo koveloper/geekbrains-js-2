@@ -299,3 +299,4 @@ class Magazine {
 }
 
 const magazine = new Magazine();
+magazine.initialize();
