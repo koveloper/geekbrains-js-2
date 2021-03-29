@@ -38,7 +38,7 @@ class GoodsItem {
 	}
 
 	render(container) {
-		if(container && container.append && typeof container.append == 'function') {
+		if(container) {
 			const goodsItem = document.createElement('div');
 			goodsItem.setAttribute('class', 'goods-item');
 			goodsItem.setAttribute('id', 'gi-' + this.id);
