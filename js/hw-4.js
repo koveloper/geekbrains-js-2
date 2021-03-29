@@ -4,9 +4,9 @@ const text = "Lorem ipsum is'nt dolor, sit amet consectetur adipisicing elit. 'O
 /** 
  Описание шаблона:
  \' - ищет одинарную кавычку
- (?!s|n):
+ (?!t|n):
     ?! - за которой НЕ следует
-    s|n - символ s или n (is'nt, isn't, aren't, are'nt)
+    t|n - символ s или n (is'nt, isn't, aren't, are'nt)
 
 /g - ищет все совпадения
 m - ищет в совпадения в мультистрочном режиме
