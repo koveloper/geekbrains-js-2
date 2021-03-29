@@ -16,7 +16,18 @@
     </main>
     <div class="cart-popup">
         <div class="cart-items">Cart is empty</div>
+        <button class="cart-popup-order" onclick="">Order</button>
         <button class="cart-popup-close" onclick="magazine.closeCart()">X</button>
+    </div>
+    <div class="order-popup">
+        <div class="order-popup-wrapper">
+            <h3 class="order-title">Insert data and make order</h3>
+            <input type="text" class="order-field order-name" placeholder="name" id="order-user-name">
+            <input type="tel" class="order-field order-phone" placeholder="+7(XXX)XXX-XXXX" id="order-user-phone">
+            <textarea class="order-field order-message" name="order-message" id="order-user-message" cols="30" rows="10" placeholder="your message"></textarea>
+            <button class="order-send" onclick="">Send order</button>
+            <button class="order-close" onclick="magazine.closeOrder()">X</button>
+        </div>
     </div>
     <script src="js/script.js"></script>    
     <script src="js/hw-4.js"></script>    

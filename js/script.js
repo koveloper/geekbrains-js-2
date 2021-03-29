@@ -197,6 +197,7 @@ class Cart {
 
 	renderMainView(container) {
 		container.innerHTML = this.goodsMap.size ? '' : 'Cart is empty';
+		document.querySelector('.cart-popup-order').style.display = this.goodsMap.size ? 'block' : 'none';
 		for (let it of this.goodsMap.values()) {
 			it.render(container);
 		}
@@ -269,6 +270,56 @@ class GoodsList {
 	}
 }
 
+class CheckField {
+	constructor(regExp, selector, isErrorRegExp = true) {
+		this.regExp = regExp;
+		this.isErrorRegExp = isErrorRegExp;
+		this.selector = selector;
+		document.querySelector(selector).addEventListener('keyup', () => {
+			const el = document.querySelector(this.selector);
+			if(!this.isCorrect()) {
+				el.classList.add('err-value');
+			} else {
+				el.classList.remove('err-value')
+			}
+		});
+	}
+	
+	checkByRegExp(text) {
+		this.regExp.lastIndex = 0;
+		return this.regExp.test(text) === this.isErrorRegExp;
+	}
+
+	isCorrect() {
+		const el = document.querySelector(this.selector);
+		return !this.checkByRegExp(el.value);		
+	}
+}
+
+class Order {
+	constructor() {
+		this.nameField = new CheckField(/[^(\x41-\x5A),(\x61-\x7A),(\u0410-\u044f),\s]+/g, '#order-user-name');
+		this.phoneField = new CheckField(/\+7\(\d{3}\)\d{3}\-\d{4}$/g, '#order-user-phone', false);
+		document.querySelector(".order-send").onclick = () => {
+			console.log(this.nameField.isCorrect())
+			console.log(this.phoneField.isCorrect())
+			if(!this.nameField.isCorrect()) {
+				alert('Wrong name format');
+				return;
+			}
+			if(!this.phoneField.isCorrect()) {
+				alert('Wrong phone format');
+				return;
+			}
+			magazine.closeOrder();
+		};
+		document.querySelector(".cart-popup-order").onclick = () => {
+			magazine.closeCart();
+			magazine.openOrder();
+		};
+	}
+}
+
 class Magazine {
 
 	constructor() {
@@ -276,6 +327,7 @@ class Magazine {
 		this.goods = new GoodsList((goodsItem) => {
 			this.addToCart(goodsItem);
 		});
+		this.order = new Order();
 	}
 
 	addToCart(goodsItem, count = 1) {
@@ -295,6 +347,14 @@ class Magazine {
 
 	closeCart() {
 		document.querySelector('.cart-popup').style.maxHeight = '0';
+	}
+
+	openOrder() {
+		document.querySelector('.order-popup').style.maxHeight = '100vh';
+	}
+
+	closeOrder() {
+		document.querySelector('.order-popup').style.maxHeight = '0';
 	}
 }
 
