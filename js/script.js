@@ -5,7 +5,7 @@ const DFLT_GOODS_ITEM = {
 	price: 99,
 	description: 'Don\'t miss our new product.',
 	images: [],
-}
+};
 
 class GoodsItem {
 
@@ -77,7 +77,7 @@ class GoodsItem {
 
 class CartItem extends GoodsItem {
 
-	constructor(goodsItem = DFLT_CART_ITEM) {
+	constructor(goodsItem = DFLT_GOODS_ITEM) {
 		super(goodsItem);
 		this.count = 0;
 	}
@@ -130,7 +130,7 @@ class CartItem extends GoodsItem {
 		cartItem.append(cartItemPrice);
 
 		const cartItemDelete = document.createElement('button');
-		cartItemDelete.textContent = `X`;
+		cartItemDelete.textContent = 'X';
 		cartItemDelete.setAttribute('class', 'cart-item-delete');
 		if (id) {
 			cartItemDelete.setAttribute('id', 'cid-' + id);
@@ -146,7 +146,7 @@ class CartItem extends GoodsItem {
 
 class Cart {
 
-	constructor(container) {
+	constructor() {
 		this.goodsMap = new Map();
 	}
 
@@ -158,7 +158,7 @@ class Cart {
 			const it = this.goodsMap.get('' + goodsItem.getId());
 			it.add(count);
 			if (it.getCount() <= 0) {
-				this.goodsMap.delete(it.getGoodsItem)
+				this.goodsMap.delete(it.getGoodsItem);
 			}
 		}
 		this.renderCompactView(document.querySelector('.cart-button'));
@@ -169,11 +169,11 @@ class Cart {
 	}
 
 	getInnerGoodsCost() {
-		return [...this.goodsMap.values()].reduce((acc, el) => { return acc + (el.getCount() * el.getPrice()) }, 0);
+		return [...this.goodsMap.values()].reduce((acc, el) => { return acc + (el.getCount() * el.getPrice()); }, 0);
 	}
 
 	getInnerGoodsCount() {
-		return [...this.goodsMap.values()].reduce((acc, el) => { return acc + el.getCount() }, 0);
+		return [...this.goodsMap.values()].reduce((acc, el) => { return acc + el.getCount(); }, 0);
 	}
 
 	renderCompactView(container) {
@@ -189,7 +189,7 @@ class Cart {
 
 	deleteCartItem(id) {
 		if (id !== undefined) {
-			this.goodsMap.delete(id)
+			this.goodsMap.delete(id);
 		} else {
 			this.goodsMap.clear();
 		}
@@ -231,7 +231,7 @@ class GoodsList {
 			if (GoodsItem.isGoodsItem(e.target)) {
 				e.stopPropagation();
 				if (addToCartCallback) {
-					addToCartCallback(this.goods.reduce((acc, el) => { return acc ? acc : (el.getId() == GoodsItem.getId(e.target) ? el : null) }, null));
+					addToCartCallback(this.goods.reduce((acc, el) => { return acc ? acc : (el.getId() == GoodsItem.getId(e.target) ? el : null); }, null));
 				}
 			}
 		});
@@ -240,16 +240,16 @@ class GoodsList {
 	initialize() {
 		const err_ = (err) => {
 			alert(err);
-		}
+		};
 		const ok_ = (goods_) => {
-			console.log(goods_)
+			console.log(goods_);
 			for (let good of goods_) {
 				this.add(good.product_name, good.product_price, good.product_description, good.product_images, good.product_id);
 			}
 			this.render();
-		}
+		};
 		fetch('https://resources.radio-most.ru/geekbrains/goods.json?v=' + Math.random())
-			.then((response) => {return response.json()})
+			.then((response) => {return response.json();})
 			.then(ok_)
 			.catch(err_);
 	}
@@ -266,7 +266,7 @@ class GoodsList {
 	render() {
 		const container = this.getContainer();
 		container.innerHTML = '';
-		this.goods.forEach(it => { it.render(container) });
+		this.goods.forEach(it => { it.render(container); });
 	}
 }
 
@@ -280,7 +280,7 @@ class CheckField {
 			if(!this.isCorrect()) {
 				el.classList.add('err-value');
 			} else {
-				el.classList.remove('err-value')
+				el.classList.remove('err-value');
 			}
 		});
 	}
@@ -300,9 +300,7 @@ class Order {
 	constructor() {
 		this.nameField = new CheckField(/[^(\x41-\x5A),(\x61-\x7A),(\u0410-\u044f),\s]+/g, '#order-user-name');
 		this.phoneField = new CheckField(/\+7\(\d{3}\)\d{3}\-\d{4}$/g, '#order-user-phone', false);
-		document.querySelector(".order-send").onclick = () => {
-			console.log(this.nameField.isCorrect())
-			console.log(this.phoneField.isCorrect())
+		document.querySelector('.order-send').onclick = () => {
 			if(!this.nameField.isCorrect()) {
 				alert('Wrong name format');
 				return;
@@ -313,7 +311,7 @@ class Order {
 			}
 			magazine.closeOrder();
 		};
-		document.querySelector(".cart-popup-order").onclick = () => {
+		document.querySelector('.cart-popup-order').onclick = () => {
 			magazine.closeCart();
 			magazine.openOrder();
 		};
