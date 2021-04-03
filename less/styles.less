@@ -27,6 +27,10 @@ body {
     justify-content: center;
 }
 
+#title {
+    margin: 0;
+}
+
 .header {
     .main-section-styles();
     position: relative;
@@ -38,12 +42,10 @@ body {
 
 .cart-button {
     box-sizing: border-box;
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    z-index: 10;
-    width: 120px;
-    height: 80px;
+    margin: 0 0 0 auto;
+    justify-self: flex-end;
+    width: 200px;
+    height: 40px;
     padding: 0;
     outline: none;
     border: none;
@@ -110,3 +112,6 @@ body {
     }
 }
 
+.opened {
+    max-height: 100vh;
+}

@@ -171,6 +171,9 @@ body {
   display: flex;
   flex-direction: column;
 }
+#title {
+  margin: 0;
+}
 .header {
   margin: 0 auto;
   width: 100%;
@@ -186,12 +189,10 @@ body {
 }
 .cart-button {
   box-sizing: border-box;
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  z-index: 10;
-  width: 120px;
-  height: 80px;
+  margin: 0 0 0 auto;
+  justify-self: flex-end;
+  width: 200px;
+  height: 40px;
   padding: 0;
   outline: none;
   border: none;
@@ -257,4 +258,7 @@ body {
 .goods-item:active::after {
   max-height: 100%;
   background: rgba(0, 0, 0, 0.1);
+}
+.opened {
+  max-height: 100vh;
 }
