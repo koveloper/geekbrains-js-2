@@ -1,69 +1,73 @@
-'use strict';
+import Vue from 'https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.esm.browser.js';
 
 const DFLT_GOODS_ITEM = {
 	name: 'NEW',
 	price: 99,
 	description: 'Don\'t miss our new product.',
 	images: [],
-}
+};
 
 class GoodsItem {
 
 	constructor({ id, name, price, description, images } = DFLT_GOODS_ITEM) {
-		this.id = id;
-		this.name = name;
-		this.price = price;
-		this.description = description;
-		this.images = images;
+		this.id_ = id;
+		this.name_ = name;
+		this.price_ = price;
+		this.description_ = description;
+		this.images_ = images;
 	}
 
-	getName() {
-		return this.name;
+	get name() {
+		return this.name_;
 	}
 
-	getPrice() {
-		return this.price;
+	get price() {
+		return this.price_;
 	}
 
-	getId() {
-		return this.id;
+	get id() {
+		return this.id_;
 	}
 
-	getDescription() {
-		return this.description;
+	get description() {
+		return this.description_;
 	}
 
-	getImages() {
-		return this.images;
+	get images() {
+		return this.images_;
 	}
 
 	render(container) {
 		if(container) {
 			const goodsItem = document.createElement('div');
 			goodsItem.setAttribute('class', 'goods-item');
-			goodsItem.setAttribute('id', 'gi-' + this.id);
+			goodsItem.setAttribute('id', `gi-${this.id_}`);
 			const goodsItemTitle = document.createElement('h3');
-			goodsItemTitle.textContent = this.name;
+			goodsItemTitle.textContent = this.name_;
 			goodsItemTitle.setAttribute('style', 'pointer-events: none');
 			goodsItem.append(goodsItemTitle);
-			console.log(this.images);
-			if (this.images && this.images.length) {
+			console.log(this.images_);
+			if (this.images_ && this.images_.length) {
 				const goodsItemImage = document.createElement('img');
-				goodsItemImage.setAttribute('src', this.images[0]);
+				goodsItemImage.setAttribute('src', this.images_[0]);
 				goodsItemImage.setAttribute('width', '64');
 				goodsItemImage.setAttribute('style', 'pointer-events: none');
 				goodsItem.append(goodsItemImage);
 			}
 			const goodsItemPrice = document.createElement('p');
-			goodsItemPrice.textContent = this.price;
+			goodsItemPrice.textContent = this.price_;
 			goodsItemPrice.setAttribute('style', 'pointer-events: none');
 			goodsItem.append(goodsItemPrice);
 			container.append(goodsItem);
 		}
 	}
 
+	get component() {
+		return document.querySelector(`#gi-${this.id_}`);
+	}
+
 	isThisItem(target) {
-		return target && target.id === 'gi-' + this.id;
+		return target && target.id === 'gi-' + this.id_;
 	}
 
 	static isGoodsItem(target) {
@@ -77,17 +81,17 @@ class GoodsItem {
 
 class CartItem extends GoodsItem {
 
-	constructor(goodsItem = DFLT_CART_ITEM) {
+	constructor(goodsItem = DFLT_GOODS_ITEM) {
 		super(goodsItem);
-		this.count = 0;
+		this.count_ = 0;
 	}
 
 	add(count = 0) {
-		this.count += count;
+		this.count_ += count;
 	}
 
-	getCount() {
-		return this.count;
+	get count() {
+		return this.count_;
 	}
 
 	render(container) {
@@ -106,7 +110,7 @@ class CartItem extends GoodsItem {
 		const cartItem = document.createElement('div');
 		cartItem.setAttribute('class', 'cart-item');
 		if (id) {
-			cartItem.setAttribute('id', 'ci-' + id);
+			cartItem.setAttribute('id', `ci-${id}`);
 		}
 		if (style) {
 			cartItem.setAttribute('style', style);
@@ -130,10 +134,10 @@ class CartItem extends GoodsItem {
 		cartItem.append(cartItemPrice);
 
 		const cartItemDelete = document.createElement('button');
-		cartItemDelete.textContent = `X`;
+		cartItemDelete.textContent = 'X';
 		cartItemDelete.setAttribute('class', 'cart-item-delete');
 		if (id) {
-			cartItemDelete.setAttribute('id', 'cid-' + id);
+			cartItemDelete.setAttribute('id', `cid-${id}`);
 		}
 		cartItem.append(cartItemDelete);
 		return cartItem;
@@ -146,91 +150,94 @@ class CartItem extends GoodsItem {
 
 class Cart {
 
-	constructor(container) {
+	constructor() {
 		this.goodsMap = new Map();
 	}
 
 	add(goodsItem, count = 1) {
 		if (goodsItem) {
-			if (!this.goodsMap.has('' + goodsItem.getId())) {
-				this.goodsMap.set('' + goodsItem.getId(), new CartItem(goodsItem));
+			if (!this.goodsMap.has('' + goodsItem.id)) {
+				this.goodsMap.set('' + goodsItem.id, new CartItem(goodsItem));
 			}
-			const it = this.goodsMap.get('' + goodsItem.getId());
+			const it = this.goodsMap.get('' + goodsItem.id);
 			it.add(count);
-			if (it.getCount() <= 0) {
-				this.goodsMap.delete(it.getGoodsItem)
+			if (it.count <= 0) {
+				this.goodsMap.delete(it.getGoodsItem);
 			}
 		}
 		this.renderCompactView(document.querySelector('.cart-button'));
+		this.renderMainView();
 	}
 
-	getInner() {
+	get inner() {
 		return [...this.goodsMap.values()];
 	}
 
-	getInnerGoodsCost() {
-		return [...this.goodsMap.values()].reduce((acc, el) => { return acc + (el.getCount() * el.getPrice()) }, 0);
+	get innerGoodsCost() {
+		return [...this.goodsMap.values()].reduce((acc, el) => { return acc + (el.count * el.price); }, 0);
 	}
 
-	getInnerGoodsCount() {
-		return [...this.goodsMap.values()].reduce((acc, el) => { return acc + el.getCount() }, 0);
+	get innerGoodsCount() {
+		return [...this.goodsMap.values()].reduce((acc, el) => { return acc + el.count; }, 0);
+	}
+
+	get container() {
+		return document.querySelector('.cart-items');
 	}
 
 	renderCompactView(container) {
 		container.textContent = '';
-		container.setAttribute('style', 'display: flex; flex-direction: column; align-items: center; justify-content: space-evenly');
+		container.setAttribute('style', 'display: flex; align-items: center; justify-content: space-evenly');
 		const sign = document.createElement('span');
-		sign.textContent = 'Carts: ' + this.getInnerGoodsCount();
-		const cost = document.createElement('span');
-		cost.textContent = 'for ' + this.getInnerGoodsCost() + '$';
+		sign.textContent = `Carts:  ${this.innerGoodsCount} / ${this.innerGoodsCost}$`;
 		container.append(sign);
-		container.append(cost);
 	}
 
 	deleteCartItem(id) {
 		if (id !== undefined) {
-			this.goodsMap.delete(id)
+			this.goodsMap.delete(id);
 		} else {
 			this.goodsMap.clear();
 		}
 	}
 
-	renderMainView(container) {
-		container.innerHTML = this.goodsMap.size ? '' : 'Cart is empty';
+	renderMainView() {
+		this.container.textContent = '';
 		for (let it of this.goodsMap.values()) {
-			it.render(container);
+			it.render(this.container);
 		}
 		if (this.goodsMap.size) {
-			container.append(CartItem.createCartItemHTML({
+			this.container.append(CartItem.createCartItemHTML({
 				name: 'Summary',
-				price: this.getInnerGoodsCost(),
+				price: this.innerGoodsCost,
 				count: 0,
 				style: 'border-top: 1px solid gray'
 			}));
 		}
-		container.onclick = (e) => {
+		this.container.onclick = (e) => {
 			if (e.target.classList && e.target.classList.contains('cart-item-delete')) {
 				if (e.target.id) {
 					this.deleteCartItem(CartItem.getIdByDeleteButton(e.target));
 				} else {
 					this.deleteCartItem();
 				}
-				this.renderMainView(container);
+				this.renderMainView();
 				this.add();
 			}
 		};
+		cartPopup.itemsCountInCart = this.innerGoodsCount;
 	}
 }
 
 class GoodsList {
 
 	constructor(addToCartCallback) {
-		this.goods = [];
-		this.getContainer().addEventListener('click', e => {
+		this.goods_ = [];
+		this.container.addEventListener('click', e => {
 			if (GoodsItem.isGoodsItem(e.target)) {
 				e.stopPropagation();
 				if (addToCartCallback) {
-					addToCartCallback(this.goods.reduce((acc, el) => { return acc ? acc : (el.getId() == GoodsItem.getId(e.target) ? el : null) }, null));
+					addToCartCallback(this.goods.reduce((acc, el) => { return acc ? acc : (el.id == GoodsItem.getId(e.target) ? el : null); }, null));
 				}
 			}
 		});
@@ -239,33 +246,85 @@ class GoodsList {
 	initialize() {
 		const err_ = (err) => {
 			alert(err);
-		}
+		};
 		const ok_ = (goods_) => {
-			console.log(goods_)
+			console.log(goods_);
 			for (let good of goods_) {
 				this.add(good.product_name, good.product_price, good.product_description, good.product_images, good.product_id);
 			}
 			this.render();
-		}
+		};
 		fetch('https://resources.radio-most.ru/geekbrains/goods.json?v=' + Math.random())
-			.then((response) => {return response.json()})
+			.then((response) => {return response.json();})
 			.then(ok_)
 			.catch(err_);
 	}
 
-	getContainer() {
+	get container() {
 		return document.querySelector('.goods-list');
 	}
 
+	get goods() {
+		return this.goods_;
+	}
+
 	add(name = DFLT_GOODS_ITEM.name, price = DFLT_GOODS_ITEM.price, description = DFLT_GOODS_ITEM.description, images = DFLT_GOODS_ITEM.images, id) {
-		id = id === undefined ? this.goods.length : id;
-		this.goods.push(new GoodsItem({ id, name, price, description, images }));
+		id = id === undefined ? this.goods_.length : id;
+		this.goods_.push(new GoodsItem({ id, name, price, description, images }));
 	}
 
 	render() {
-		const container = this.getContainer();
+		const container = this.container;
 		container.innerHTML = '';
-		this.goods.forEach(it => { it.render(container) });
+		this.goods_.forEach(it => { it.render(container); });
+	}
+}
+
+class CheckField {
+	constructor(regExp, selector, isErrorRegExp = true) {
+		this.regExp = regExp;
+		this.isErrorRegExp = isErrorRegExp;
+		this.selector = selector;
+		document.querySelector(selector).addEventListener('keyup', () => {
+			const el = document.querySelector(this.selector);
+			if(!this.isCorrect()) {
+				el.classList.add('err-value');
+			} else {
+				el.classList.remove('err-value');
+			}
+		});
+	}
+	
+	checkByRegExp(text) {
+		this.regExp.lastIndex = 0;
+		return this.regExp.test(text) === this.isErrorRegExp;
+	}
+
+	isCorrect() {
+		const el = document.querySelector(this.selector);
+		return !this.checkByRegExp(el.value);		
+	}
+}
+
+class Order {
+	constructor() {
+		this.nameField = new CheckField(/[^(\x41-\x5A),(\x61-\x7A),(\u0410-\u044f),\s]+/g, '#order-user-name');
+		this.phoneField = new CheckField(/\+7\(\d{3}\)\d{3}\-\d{4}$/g, '#order-user-phone', false);
+		document.querySelector('.order-send').onclick = () => {
+			if(!this.nameField.isCorrect()) {
+				alert('Wrong name format');
+				return;
+			}
+			if(!this.phoneField.isCorrect()) {
+				alert('Wrong phone format');
+				return;
+			}
+			magazine.closeOrder();
+		};
+		document.querySelector('.cart-popup-order').onclick = () => {
+			magazine.closeCart();
+			magazine.openOrder();
+		};
 	}
 }
 
@@ -273,29 +332,95 @@ class Magazine {
 
 	constructor() {
 		this.cart = new Cart();
-		this.goods = new GoodsList((goodsItem) => {
+		this.goodsList_ = new GoodsList((goodsItem) => {
 			this.addToCart(goodsItem);
 		});
+		this.order = new Order();
 	}
 
 	addToCart(goodsItem, count = 1) {
 		console.log(this);
 		console.log(goodsItem);
-		this.cart.add(goodsItem, count);
+		this.cart.add(goodsItem, count);		
 	}
 
 	initialize() {
-		this.goods.initialize();
+		document.querySelector('.cart-button').onclick = () => {this.openCart();};
+		document.querySelector('.cart-popup-close').onclick = () => {this.closeCart();};
+		this.goodsList_.initialize();
 	}
 
-	openCart() {
-		this.cart.renderMainView(document.querySelector('.cart-items'));
-		document.querySelector('.cart-popup').style.maxHeight = '100vh';
+	openOrder() {
+		document.querySelector('.order-popup').style.maxHeight = '100vh';
 	}
 
-	closeCart() {
-		document.querySelector('.cart-popup').style.maxHeight = '0';
+	closeOrder() {
+		document.querySelector('.order-popup').style.maxHeight = '0';
+	}
+
+	get goodsList() {
+		return this.goodsList_;
 	}
 }
 
 const magazine = new Magazine();
+magazine.initialize();
+
+const filter = new Vue({
+	el: '#filter',
+	searchLine : null,
+	methods: {
+		filterValueChanged($event) {
+			this.searchLine  = $event.currentTarget.value;
+			this.applyFilter();
+		},
+		applyFilter() {
+			const regExp = new RegExp(filter.searchLine, 'gmi');
+			magazine.goodsList.goods.forEach(el => {
+				el.component.style.display = regExp.test(el.name) ? 'flex' : 'none'; 
+				regExp.lastIndex = 0;
+			});
+			console.log(magazine.goodsList.goods);
+		}		
+	}
+});
+
+const search = new Vue({
+	el: '.header-filter-search',
+	data: {
+		searchTitle: 'Search'
+	},
+	methods: {
+		filterGoods() {
+			filter.applyFilter();
+		}
+	}
+});
+
+const openCartButton = new Vue({
+	el: '.cart-button',
+	methods: {
+		openCart() {
+			cartPopup.open();
+		}
+	}
+});
+
+const cartPopup = new Vue({
+	el: '.cart-popup',
+	data: {
+		isVisible: false,
+		itemsCountInCart: 0
+	},
+	methods: {
+		open() {
+			console.log(magazine.cart.innerGoodsCount);
+			this.itemsCountInCart = magazine.cart.innerGoodsCount;
+			this.isVisible = true;
+		},
+		close() {
+			cartPopup.isVisible = false;
+		}
+	}
+});
+
