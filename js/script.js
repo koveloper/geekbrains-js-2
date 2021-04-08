@@ -424,3 +424,4 @@ const cartPopup = new Vue({
 	}
 });
 
+///hw-6
