@@ -4,7 +4,10 @@
   "description": "Homeworks from GeekBrains JavaScript level-2 courses",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "eslint": "eslint src/",
+    "test": "npm run eslint",
+    "build": "webpack --mode development",
+    "start": "webpack-dev-server --open"
   },
   "repository": {
     "type": "git",
@@ -21,6 +24,9 @@
   },
   "homepage": "https://github.com/koveloper/geekbrains-js-2#readme",
   "devDependencies": {
-    "eslint": "^7.22.0"
+    "eslint": "^7.22.0",
+    "webpack": "^4.44.2",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   }
 }

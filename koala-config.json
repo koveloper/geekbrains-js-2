@@ -5,6 +5,9 @@
 		"css", 
 		"js", 
 		"node_modules", 
-		"resources"		
+		"*cart.less", 
+		"*order.less", 
+		"resources",
+		"src"		
 	]
 }
